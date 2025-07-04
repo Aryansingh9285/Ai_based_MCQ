@@ -6,7 +6,8 @@ import { parseQuestions } from '@/lib/parseQuestions';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github.css'; // Or your preferred code theme
+import 'highlight.js/styles/github.css'; 
+import HamsterWheel from './HamsterWheel';
 
 export default function TestPage() {
   const searchParams = useSearchParams();
@@ -61,8 +62,16 @@ export default function TestPage() {
   };
 
   if (!hydrated) return null;
-  if (!questions.length) return <p className="text-center mt-20 text-gray-500">Loading questions...</p>;
-
+  if (!questions.length) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <HamsterWheel />
+        <div className="text-center mt-4">
+          <p className="text-lg font-medium text-gray-700">Questions are loading...</p>
+        </div>
+      </div>
+    );
+  }
   const q = questions[current];
   const userAnswer = selected;
   const isCorrect = userAnswer?.trim().toLowerCase() === q.answer?.trim().toLowerCase();
@@ -127,9 +136,20 @@ export default function TestPage() {
               isCorrect ? 'text-green-600' : 'text-red-600'
             }`}
           >
-            {isCorrect
-              ? '✅ Correct!'
-              : `❌ Incorrect! Correct Answer: ${correctLetter} ("${correctValue}")`}
+            {isCorrect ? (
+  <span className="text-green-600 font-bold">✅ Correct!</span>
+) : (
+  <div>
+    <p className="text-red-600 font-bold">
+      ❌ Incorrect! Your answer:-  {userAnswer}.
+    </p>
+    <p>
+      <span className="text-green-600 font-bold">✅ Correct :-</span>
+      <span className="text-blue-600 font-bold"> {correctLetter}. {correctValue}</span>
+    </p>
+  </div>
+)}
+
           </p>
           <p className="mb-4 text-gray-700">
             📘 <strong>Explanation:</strong>{' '}
