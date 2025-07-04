@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Gemini returned empty response.' });
     }
 
-    // Trim unnecessary parts
+    // Trim out extra disclaimer if present
     const startIndex = fullText.indexOf('1. **Summary:**');
     const endIndex = fullText.indexOf('**Important Disclaimer:**');
     const trimmed = startIndex !== -1 ? fullText.slice(startIndex, endIndex !== -1 ? endIndex : undefined) : fullText;
@@ -51,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (let line of lines) {
       line = line.trim();
 
-      // Numbered section headings (1. 2. 3.)
+      // Numbered section headings (e.g., 1. **Summary:**)
       if (/^\d+\.\s+\*\*(.+?)\*\*/.test(line)) {
         if (listStarted) {
           html += '</ul>';
@@ -59,11 +59,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         const match = line.match(/^\d+\.\s+\*\*(.+?)\*\*/);
         const headingText = match ? match[1].trim() : line;
-        html += `<h2 class="text-2xl font-extrabold text-indigo-700 mt-6">${headingText}</h2>`;
+        html += `<h2 class="text-2xl font-bold text-indigo-800 mt-8 mb-2">${headingText}</h2>`;
         continue;
       }
 
-      // Bullet list
+      // Bullet list items
       if (line.startsWith('*')) {
         if (!listStarted) {
           html += '<ul class="list-disc pl-6 space-y-1">';
@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         continue;
       }
 
-      // Markdown-style bold headings
+      // Markdown-style bold subheadings
       if (line.startsWith('**') && line.endsWith('**')) {
         if (listStarted) {
           html += '</ul>';
@@ -85,7 +85,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         continue;
       }
 
-      // Paragraph
+      // Plain paragraph
       if (listStarted) {
         html += '</ul>';
         listStarted = false;

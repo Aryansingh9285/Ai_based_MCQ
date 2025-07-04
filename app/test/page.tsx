@@ -6,7 +6,7 @@ import { parseQuestions } from '@/lib/parseQuestions';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github.css'; 
+import 'highlight.js/styles/github.css';
 import HamsterWheel from './HamsterWheel';
 
 export default function TestPage() {
@@ -72,32 +72,35 @@ export default function TestPage() {
       </div>
     );
   }
+
   const q = questions[current];
   const userAnswer = selected;
-  const isCorrect = userAnswer?.trim().toLowerCase() === q.answer?.trim().toLowerCase();
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-  let correctIndex = -1;
-  let correctLetter = '?';
-  let correctValue = q.answer;
 
+  // Always resolve correctIndex and correctValue
+  let correctIndex = -1;
+  let correctValue = q.answer;
   if (optionLetters.includes(q.answer?.toUpperCase())) {
-    // If q.answer is a letter, map to index
     correctIndex = optionLetters.indexOf(q.answer.toUpperCase());
-    correctLetter = optionLetters[correctIndex] || '?';
     correctValue = q.options[correctIndex];
   } else {
-    // If q.answer is a value, find its index
     correctIndex = q.options.findIndex(
       (opt: string) => opt.trim().toLowerCase() === q.answer?.trim().toLowerCase()
     );
-    correctLetter = optionLetters[correctIndex] || '?';
-    correctValue = q.answer;
+    correctValue = q.options[correctIndex];
   }
+  if (correctIndex === -1) correctIndex = 0;
+  const correctLetter = optionLetters[correctIndex] || '?';
+
+  // Final fixed answer check
+  const isCorrect =
+    userAnswer?.trim().toLowerCase() === correctValue?.trim().toLowerCase();
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10">
       <h1 className="text-3xl font-extrabold text-indigo-600 mb-6">
-        Quiz for <span className="text-gray-800">{name}</span> on <span className="italic">{domain}</span>
+        Quiz for <span className="text-gray-800">{name}</span> on{' '}
+        <span className="italic">{domain}</span>
       </h1>
 
       <div className="prose max-w-none text-lg text-gray-800 mb-6">
@@ -137,19 +140,21 @@ export default function TestPage() {
             }`}
           >
             {isCorrect ? (
-  <span className="text-green-600 font-bold">✅ Correct!</span>
-) : (
-  <div>
-    <p className="text-red-600 font-bold">
-      ❌ Incorrect! Your answer:-  {userAnswer}.
-    </p>
-    <p>
-      <span className="text-green-600 font-bold">✅ Correct :-</span>
-      <span className="text-blue-600 font-bold"> {correctLetter}. {correctValue}</span>
-    </p>
-  </div>
-)}
-
+              <span className="text-green-600 font-bold">✅ Correct!</span>
+            ) : (
+              <div>
+                <p className="text-red-600 font-bold">
+                  ❌ Incorrect! Your answer: {userAnswer}.
+                </p>
+                <p>
+                  <span className="text-green-600 font-bold">✅ Correct:</span>
+                  <span className="text-blue-600 font-bold">
+                    {' '}
+                    {correctLetter}. {correctValue}
+                  </span>
+                </p>
+              </div>
+            )}
           </p>
           <p className="mb-4 text-gray-700">
             📘 <strong>Explanation:</strong>{' '}
