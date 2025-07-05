@@ -33,7 +33,8 @@ function TestPageContent() {
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<string[]>([]);
+  // Store answers as objects: { text, isCorrect, chosenOption }
+  const [answers, setAnswers] = useState<any[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -61,7 +62,35 @@ function TestPageContent() {
   const handleAnswer = (choice: string) => {
     if (showFeedback) return;
     setSelected(choice);
-    setAnswers(prev => [...prev, choice]);
+
+    // Determine correct answer for this question
+    const q = questions[current];
+    const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    let correctIndex = -1;
+    let correctValue = q.answer;
+    if (optionLetters.includes(q.answer?.toUpperCase())) {
+      correctIndex = optionLetters.indexOf(q.answer.toUpperCase());
+      correctValue = q.options[correctIndex];
+    } else {
+      correctIndex = q.options.findIndex(
+        (opt: string) => opt.trim().toLowerCase() === q.answer?.trim().toLowerCase()
+      );
+      correctValue = q.options[correctIndex];
+    }
+    if (correctIndex === -1) correctIndex = 0;
+
+    const isCorrect = choice.trim().toLowerCase() === correctValue?.trim().toLowerCase();
+
+    setAnswers(prev => [
+      ...prev,
+      {
+        text: choice,
+        isCorrect,
+        chosenOption: choice,
+        correctOption: correctValue,
+        question: q.question,
+      },
+    ]);
     setShowFeedback(true);
   };
 

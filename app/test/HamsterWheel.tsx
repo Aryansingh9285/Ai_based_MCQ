@@ -1,16 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const HamsterWheel = () => {
+  const [animationPhase, setAnimationPhase] = useState(0);
+  const [showSparkles, setShowSparkles] = useState(false);
+
+  useEffect(() => {
+    // Cycle through different animation phases for variety
+    const interval = setInterval(() => {
+      setAnimationPhase(prev => (prev + 1) % 4);
+    }, 3000);
+
+    // Occasional sparkle effects
+    const sparkleInterval = setInterval(() => {
+      setShowSparkles(true);
+      setTimeout(() => setShowSparkles(false), 1000);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(sparkleInterval);
+    };
+  }, []);
+
   return (
-    <>
+    <div className="relative flex items-center justify-center">
+      {/* Floating particles around the wheel */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-yellow-300 rounded-full opacity-40 animate-float"
+            style={{
+              left: `${20 + (i * 10)}%`,
+              top: `${30 + (i % 2) * 40}%`,
+              animationDelay: `${i * 0.5}s`,
+              animationDuration: `${2 + Math.random()}s`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Sparkles effect */}
+      {showSparkles && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 0.5}s`,
+                animationDuration: '0.8s'
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-orange-200 to-yellow-200 rounded-full blur-xl opacity-30 animate-pulse"></div>
+
+      {/* Main hamster wheel */}
       <div
         role="img"
         aria-label="Orange and tan hamster running in a metal wheel"
-        className="wheel-and-hamster relative w-[12em] h-[12em] text-[14px] bg-[#1c1c1c] rounded-full overflow-hidden"
+        className={`wheel-and-hamster relative w-[12em] h-[12em] text-[14px] bg-gradient-to-br from-gray-700 to-gray-900 rounded-full overflow-hidden shadow-2xl transform transition-all duration-1000 ${
+          animationPhase === 1 ? 'scale-105' : animationPhase === 2 ? 'rotate-3' : animationPhase === 3 ? 'scale-95' : 'scale-100'
+        }`}
+        style={{
+          boxShadow: '0 0 30px rgba(255, 165, 0, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.3)'
+        }}
       >
         <div className="wheel absolute top-0 left-0 w-full h-full rounded-full z-[2]" />
 
-        {/* ✅ Fixed positioning using original CSS values */}
+        {/* Enhanced hamster with better colors */}
         <div
           className="hamster absolute w-[7em] h-[3.75em] z-[1]"
           style={{ 
@@ -37,6 +101,18 @@ const HamsterWheel = () => {
         <div className="spoke absolute top-0 left-0 w-full h-full rounded-full" />
       </div>
 
+      {/* Loading text with animation */}
+      <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
+        <div className="flex items-center space-x-1">
+          <span className="text-gray-600 font-medium">Loading</span>
+          <div className="flex space-x-1">
+            <div className="w-1 h-1 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+            <div className="w-1 h-1 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+            <div className="w-1 h-1 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+          </div>
+        </div>
+      </div>
+
       <style>{`
         .wheel-and-hamster {
           --dur: 1s;
@@ -59,28 +135,30 @@ const HamsterWheel = () => {
 
         .hamster__body {
           animation: hamsterBody var(--dur) ease-in-out infinite;
-          background: hsl(30, 90%, 90%);
+          background: linear-gradient(135deg, hsl(30, 90%, 90%), hsl(35, 85%, 85%));
           border-radius: 50% 30% 50% 30% / 15% 60% 40% 40%;
           box-shadow:
             0.1em 0.75em 0 hsl(30, 90%, 55%) inset,
-            0.15em -0.5em 0 hsl(30, 90%, 80%) inset;
+            0.15em -0.5em 0 hsl(30, 90%, 80%) inset,
+            0 0 10px rgba(255, 165, 0, 0.3);
           transform-origin: 17% 50%;
           transform-style: preserve-3d;
         }
 
         .hamster__head {
           animation: hamsterHead var(--dur) ease-in-out infinite;
-          background: hsl(30, 90%, 55%);
+          background: linear-gradient(135deg, hsl(30, 90%, 65%), hsl(25, 85%, 55%));
           border-radius: 70% 30% 0 100% / 40% 25% 25% 60%;
           box-shadow:
             0 -0.25em 0 hsl(30, 90%, 80%) inset,
-            0.75em -1.55em 0 hsl(30, 90%, 90%) inset;
+            0.75em -1.55em 0 hsl(30, 90%, 90%) inset,
+            0 0 8px rgba(255, 140, 0, 0.4);
           transform-origin: 100% 50%;
         }
 
         .hamster__ear {
           animation: hamsterEar var(--dur) ease-in-out infinite;
-          background: hsl(0, 90%, 85%);
+          background: linear-gradient(135deg, hsl(0, 90%, 85%), hsl(5, 85%, 80%));
           border-radius: 50%;
           box-shadow: -0.25em 0 hsl(30, 90%, 55%) inset;
           transform-origin: 50% 75%;
@@ -88,13 +166,15 @@ const HamsterWheel = () => {
 
         .hamster__eye {
           animation: hamsterEye var(--dur) linear infinite;
-          background-color: hsl(0, 0%, 0%);
+          background: radial-gradient(circle, hsl(0, 0%, 0%) 60%, hsl(0, 0%, 20%) 100%);
           border-radius: 50%;
+          box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) inset;
         }
 
         .hamster__nose {
-          background: hsl(0, 90%, 75%);
+          background: linear-gradient(135deg, hsl(0, 90%, 75%), hsl(350, 85%, 70%));
           border-radius: 35% 65% 85% 15% / 70% 50% 50% 30%;
+          box-shadow: 0 0 2px rgba(255, 105, 180, 0.5);
         }
 
         .hamster__limb--fr,
@@ -136,7 +216,7 @@ const HamsterWheel = () => {
 
         .hamster__tail {
           animation: hamsterTail var(--dur) linear infinite;
-          background: hsl(0, 90%, 85%);
+          background: linear-gradient(135deg, hsl(0, 90%, 85%), hsl(5, 85%, 80%));
           border-radius: 0.25em 50% 50% 0.25em;
           box-shadow: 0 -0.2em 0 hsl(0, 90%, 75%) inset;
           transform: rotate(30deg) translateZ(-1px);
@@ -201,8 +281,13 @@ const HamsterWheel = () => {
           from { transform: rotate(0); }
           to { transform: rotate(-1turn); }
         }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+          50% { transform: translateY(-10px) rotate(180deg); opacity: 0.8; }
+        }
       `}</style>
-    </>
+    </div>
   );
 };
 
