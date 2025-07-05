@@ -10,7 +10,7 @@ export default function HomePage() {
   const [focusedField, setFocusedField] = useState('');
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name || !domain) return;
     router.push(`/test?name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`);

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 export default function AssessmentPage() {
   const [hydrated, setHydrated] = useState(false);
   const [summary, setSummary] = useState('');
-  const [parsedAnswers, setParsedAnswers] = useState<string[]>([]);
+  const [parsedAnswers, setParsedAnswers] = useState<any[]>([]);
   const [name, setName] = useState('');
   const [domain, setDomain] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -78,7 +78,7 @@ export default function AssessmentPage() {
   if (!hydrated) return null;
 
   const getDomainEmoji = (domain: string) => {
-    const emojis = {
+    const emojis: Record<string, string> = {
       'JavaScript': '🚀',
       'Python': '🐍',
       'Java': '☕',
@@ -87,22 +87,22 @@ export default function AssessmentPage() {
       'TypeScript': '📘',
       'React': '⚛️'
     };
-    return emojis[domain] || '🎯';
+    return emojis[domain as keyof typeof emojis] || '🎯';
   };
 
   // Calculate correct and wrong counts
   const correctCount = parsedAnswers.filter(
-    (ans: any) => ans?.isCorrect === true
+    (ans) => typeof ans === 'object' && (ans as { isCorrect?: boolean }).isCorrect === true
   ).length;
   const wrongCount = parsedAnswers.filter(
-    (ans: any) => ans?.isCorrect === false
+    (ans) => typeof ans === 'object' && (ans as { isCorrect?: boolean }).isCorrect === false
   ).length;
   const chosenOptions = parsedAnswers.map(
-    (ans: any, idx: number) =>
-      typeof ans === 'object' && ans.chosenOption
-        ? `${idx + 1}) ${ans.chosenOption}`
-        : typeof ans === 'object' && ans.text
-        ? `${idx + 1}) ${ans.text}`
+    (ans, idx: number) =>
+      typeof ans === 'object' && (ans as { chosenOption?: string }).chosenOption
+        ? `${idx + 1}) ${(ans as { chosenOption: string }).chosenOption}`
+        : typeof ans === 'object' && (ans as { text?: string }).text
+        ? `${idx + 1}) ${(ans as { text: string }).text}`
         : `${idx + 1}) ${ans}`
   );
 
@@ -225,7 +225,7 @@ export default function AssessmentPage() {
                     }`}
                   >
                     {/* Correct answer style */}
-                    {ans?.isCorrect !== false ? (
+                    {typeof ans === 'object' && (ans as { isCorrect?: boolean }).isCorrect !== false ? (
                       <div className="bg-gradient-to-r from-green-100 to-blue-50 rounded-2xl p-4 border-l-4 border-green-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
                         <div className="flex items-start space-x-3">
                           <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold animate-bounce-gentle">
@@ -233,7 +233,7 @@ export default function AssessmentPage() {
                           </div>
                           <div className="flex-1 flex items-center">
                             <span className="text-2xl mr-2">✅</span>
-                            <p className="text-gray-800 font-medium">{typeof ans === 'object' ? ans.text : ans}</p>
+                            <p className="text-gray-800 font-medium">{(ans as { text?: string }).text}</p>
                           </div>
                         </div>
                       </div>
@@ -246,7 +246,7 @@ export default function AssessmentPage() {
                           </div>
                           <div className="flex-1 flex items-center">
                             <span className="text-2xl mr-2">❌</span>
-                            <p className="text-gray-800 font-medium">{typeof ans === 'object' ? ans.text : ans}</p>
+                            <p className="text-gray-800 font-medium">{typeof ans === 'object' ? (ans as { text?: string }).text : ans}</p>
                           </div>
                         </div>
                       </div>
