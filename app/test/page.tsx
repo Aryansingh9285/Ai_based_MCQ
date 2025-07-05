@@ -115,84 +115,96 @@ function TestPageContent() {
     userAnswer?.trim().toLowerCase() === correctValue?.trim().toLowerCase();
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10">
-      <h1 className="text-3xl font-extrabold text-indigo-600 mb-6">
-        Quiz for <span className="text-gray-800">{name}</span> on{' '}
-        <span className="italic">{domain}</span>
-      </h1>
-
-      <div className="prose max-w-none text-lg text-gray-800 mb-6">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight]}
-        >
-          {q.question}
-        </ReactMarkdown>
-      </div>
-
-      <div className="grid gap-4 mb-6">
-        {q.options.map((opt: string, idx: number) => (
-          <button
-            key={idx}
-            onClick={() => handleAnswer(opt)}
-            disabled={showFeedback || selected !== null}
-            className={`w-full py-3 px-4 rounded-lg border text-gray-700 font-medium transition-all
-              ${
-                selected === opt
-                  ? 'bg-indigo-100 border-indigo-500'
-                  : 'bg-white border-gray-300 hover:bg-indigo-50'
-              }
-              ${showFeedback ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
-            `}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-
-      {showFeedback && (
-        <div className="p-4 border-t border-gray-200 mt-4">
-          <p
-            className={`mb-2 text-lg font-semibold ${
-              isCorrect ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {isCorrect ? (
-              <span className="text-green-600 font-bold">✅ Correct!</span>
-            ) : (
-              <div>
-                <p className="text-red-600 font-bold">
-                  ❌ Incorrect! Your answer: {userAnswer}.
-                </p>
-                <p>
-                  <span className="text-green-600 font-bold">✅ Correct:</span>
-                  <span className="text-blue-600 font-bold">
-                    {' '}
-                    {correctLetter}. {correctValue}
-                  </span>
-                </p>
-              </div>
-            )}
-          </p>
-          <p className="mb-4 text-gray-700">
-            📘 <strong>Explanation:</strong>{' '}
-            <span className="inline">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
-              >
-                {q.explanation}
-              </ReactMarkdown>
-            </span>
-          </p>
-          <button
-            onClick={handleNext}
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-semibold transition"
-          >
-            {current < questions.length - 1 ? 'Next' : 'Finish'}
-          </button>
+    <>
+      {/* Header */}
+      <header className="w-full py-4 bg-indigo-700 text-white shadow-md">
+        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold tracking-tight">FANG Quiz App</h1>
+          <span className="text-sm font-medium">AI Interview Practice</span>
         </div>
-      )}
-    </div>
+      </header>
+
+      <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10">
+        <h1 className="text-3xl font-extrabold text-indigo-600 mb-6">
+          Quiz for <span className="text-gray-800">{name}</span> on{' '}
+          <span className="italic">{domain}</span>
+        </h1>
+
+        <div className="prose max-w-none text-lg text-gray-800 mb-6">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
+            {q.question}
+          </ReactMarkdown>
+        </div>
+
+        <div className="grid gap-4 mb-6">
+          {q.options.map((opt: string, idx: number) => (
+            <button
+              key={idx}
+              onClick={() => handleAnswer(opt)}
+              disabled={showFeedback || selected !== null}
+              className={`w-full py-3 px-4 rounded-lg border text-gray-700 font-medium transition-all
+                ${
+                  selected === opt
+                    ? 'bg-indigo-100 border-indigo-500'
+                    : 'bg-white border-gray-300 hover:bg-indigo-50'
+                }
+                ${showFeedback ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
+              `}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+
+        {showFeedback && (
+          <div className="p-4 border-t border-gray-200 mt-4">
+            <p
+              className={`mb-2 text-lg font-semibold ${
+                isCorrect ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
+              {isCorrect ? (
+                <span className="text-green-600 font-bold">✅ Correct!</span>
+              ) : (
+                <div>
+                  <p className="text-red-600 font-bold">
+                    ❌ Incorrect! Your answer: {userAnswer}.
+                  </p>
+                  <p>
+                    <span className="text-green-600 font-bold">✅ Correct:</span>
+                    <span className="text-blue-600 font-bold">
+                      {' '}
+                      {correctLetter}. {correctValue}
+                    </span>
+                  </p>
+                </div>
+              )}
+            </p>
+            <p className="mb-4 text-gray-700">
+              📘 <strong>Explanation:</strong>{' '}
+              <span className="inline">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {q.explanation}
+                </ReactMarkdown>
+              </span>
+            </p>
+            <button
+              onClick={handleNext}
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-semibold transition"
+            >
+              {current < questions.length - 1 ? 'Next' : 'Finish'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      
+    </>
   );
 }
