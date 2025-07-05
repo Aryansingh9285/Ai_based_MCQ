@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "FANG Quiz App",
-  description: "AI-generated interview quizzes using Gemini",
+  description: "AI-generated interview quizzes",
 };
 
 export default function RootLayout({

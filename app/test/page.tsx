@@ -12,8 +12,8 @@ import HamsterWheel from './HamsterWheel';
 export default function TestPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const name = searchParams.get('name') ?? '';
-  const domain = searchParams.get('domain') ?? '';
+  const name = searchParams?.get('name') ?? '';
+  const domain = searchParams?.get('domain') ?? '';
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
