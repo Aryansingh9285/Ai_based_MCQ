@@ -15,7 +15,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-white px-4 sm:px-6 lg:px-8 overflow-auto">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-blue-400 px-4 sm:px-6 lg:px-8 overflow-auto">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md sm:max-w-lg md:max-w-xl p-6 sm:p-8 space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-indigo-700 text-center">Start Your Quiz</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
