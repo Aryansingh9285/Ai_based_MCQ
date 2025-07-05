@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const endIndex = fullText.indexOf('**Important Disclaimer:**');
     const trimmed = startIndex !== -1 ? fullText.slice(startIndex, endIndex !== -1 ? endIndex : undefined) : fullText;
 
-    const lines = trimmed.split('\n').filter(line => line.trim() !== '');
+    const lines = trimmed.split('\n').filter((line: string) => line.trim() !== '');
 
     let html = '<div class="space-y-6 text-gray-800 leading-relaxed">';
     let listStarted = false;

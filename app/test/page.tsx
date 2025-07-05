@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { parseQuestions } from '@/lib/parseQuestions';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,6 +10,22 @@ import 'highlight.js/styles/github.css';
 import HamsterWheel from './HamsterWheel';
 
 export default function TestPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen flex-col">
+          <div className="text-center mt-4">
+            <p className="text-lg font-medium text-gray-700">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <TestPageContent />
+    </Suspense>
+  );
+}
+
+function TestPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const name = searchParams?.get('name') ?? '';
@@ -56,7 +72,9 @@ export default function TestPage() {
       setCurrent(current + 1);
     } else {
       router.push(
-        `/assessment?name=${name}&domain=${domain}&answers=${encodeURIComponent(JSON.stringify(answers))}`
+        `/assessment?name=${name}&domain=${domain}&answers=${encodeURIComponent(
+          JSON.stringify(answers)
+        )}`
       );
     }
   };
@@ -113,7 +131,7 @@ export default function TestPage() {
       </div>
 
       <div className="grid gap-4 mb-6">
-        {q.options.map((opt, idx) => (
+        {q.options.map((opt: string, idx: number) => (
           <button
             key={idx}
             onClick={() => handleAnswer(opt)}
