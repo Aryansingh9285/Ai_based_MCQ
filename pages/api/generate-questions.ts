@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro:generateContent"; // use pro for better quality
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"; // ✅ use a valid URL
 
 export default async function handler(
   req: NextApiRequest,
@@ -56,31 +56,32 @@ Explanation: Setting \`length = 0\` clears the array.
 💡 Do not include intro text, summaries, or closing remarks. Start directly with the first question.
 `;
 
-    const geminiRes = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.8, // Slight randomness for diversity
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 3000,
+    const geminiRes = await fetch(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.8,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 3000,
+          },
+        }),
+      }
+    );
 
     if (!geminiRes.ok) {
       const error = await geminiRes.text();
-      return res
-        .status(500)
-        .json({ error: "Gemini API error", details: error });
+      return res.status(500).json({ error: "Gemini API error", details: error });
     }
 
     const geminiData = await geminiRes.json();
@@ -91,9 +92,7 @@ Explanation: Setting \`length = 0\` clears the array.
       "";
 
     if (!content) {
-      return res
-        .status(500)
-        .json({ error: "No content returned from Gemini" });
+      return res.status(500).json({ error: "No content returned from Gemini" });
     }
 
     res.status(200).json({ content });
