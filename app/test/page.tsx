@@ -33,7 +33,8 @@ function TestPageContent() {
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<string[]>([]);
+  // Store answers as objects: { text, isCorrect, chosenOption }
+  const [answers, setAnswers] = useState<any[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -61,7 +62,35 @@ function TestPageContent() {
   const handleAnswer = (choice: string) => {
     if (showFeedback) return;
     setSelected(choice);
-    setAnswers(prev => [...prev, choice]);
+
+    // Determine correct answer for this question
+    const q = questions[current];
+    const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    let correctIndex = -1;
+    let correctValue = q.answer;
+    if (optionLetters.includes(q.answer?.toUpperCase())) {
+      correctIndex = optionLetters.indexOf(q.answer.toUpperCase());
+      correctValue = q.options[correctIndex];
+    } else {
+      correctIndex = q.options.findIndex(
+        (opt: string) => opt.trim().toLowerCase() === q.answer?.trim().toLowerCase()
+      );
+      correctValue = q.options[correctIndex];
+    }
+    if (correctIndex === -1) correctIndex = 0;
+
+    const isCorrect = choice.trim().toLowerCase() === correctValue?.trim().toLowerCase();
+
+    setAnswers(prev => [
+      ...prev,
+      {
+        text: choice,
+        isCorrect,
+        chosenOption: choice,
+        correctOption: correctValue,
+        question: q.question,
+      },
+    ]);
     setShowFeedback(true);
   };
 
@@ -84,9 +113,6 @@ function TestPageContent() {
     return (
       <div className="flex items-center justify-center h-screen flex-col">
         <HamsterWheel />
-        <div className="text-center mt-4">
-          <p className="text-lg font-medium text-gray-700">Questions are loading...</p>
-        </div>
       </div>
     );
   }
@@ -116,14 +142,6 @@ function TestPageContent() {
 
   return (
     <>
-      {/* Header */}
-      <header className="w-full py-4 bg-indigo-700 text-white shadow-md">
-        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight">FANG Quiz App</h1>
-          <span className="text-sm font-medium">AI Interview Practice</span>
-        </div>
-      </header>
-
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10">
         <h1 className="text-3xl font-extrabold text-indigo-600 mb-6">
           Quiz for <span className="text-gray-800">{name}</span> on{' '}
