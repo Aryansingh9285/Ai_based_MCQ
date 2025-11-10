@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ""; // ✅ safer
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
@@ -20,7 +20,7 @@ export default async function handler(
 
   try {
     const prompt = `
-Generate 20 multiple-choice questions suitable for technical interviews at companies like Google, Amazon, or Meta in the domain: ${domain}.
+Generate 20 multiple-choice questions suitable for updated technical interviews at companies like Google, Amazon, or Meta or Indian origin company  in the domain: ${domain}.
 
 Each question must:
 - Have 4 options (A-D)

@@ -52,15 +52,16 @@ export default function HomePage() {
               >
                 <option value="">Select a domain</option>
                 <option value="JavaScript">JavaScript</option>
-                <option value="Python">Python</option>
                 <option value="Java">Java</option>
-                <option value="C++">C++</option>
                 <option value="C#">C#</option>
                 <option value="Data Structure Algorithm">DSA</option>
+                <option value="Nextjs"></option>
                 <option value="TypeScript">TypeScript</option>
-                <option value="SSC CGL">SSC Cgl</option>
-                <option value="PHP">PHP</option>
-                <option value="Swift">Swift</option>
+                <option value="Html Css">HTML CSS</option>
+                <option value="Apex Salesforce">Apex(Salesforce)</option>
+                <option value="React js">Ruby</option>
+                <option value="Go">Go</option>
+                <option value="SQL">SQL</option>
               </select>
             </div>
 
