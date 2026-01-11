@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"; // ✅ use a valid URL
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 export default async function handler(
   req: NextApiRequest,
@@ -80,8 +80,55 @@ Explanation: Setting \`length = 0\` clears the array.
     );
 
     if (!geminiRes.ok) {
-      const error = await geminiRes.text();
-      return res.status(500).json({ error: "Gemini API error", details: error });
+      const errorText = await geminiRes.text();
+      let parsedError: any = {};
+      
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch {
+        parsedError = { error: { message: errorText } };
+      }
+
+      const status = geminiRes.status;
+      const errorMessage = parsedError?.error?.message || errorText;
+
+      // Handle quota/rate limit errors specifically
+      if (status === 429 || errorMessage.includes("quota") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
+        return res.status(429).json({
+          error: "API Quota Exceeded",
+          status: "QUOTA_EXCEEDED",
+          message: "You've exceeded the free tier quota for Gemini API.",
+          solutions: [
+            "1. Upgrade your plan: https://ai.google.dev/pricing",
+            "2. Enable billing in Google Cloud Console: https://console.cloud.google.com/",
+            "3. Wait for quota reset (usually next month for free tier)",
+            "4. Use a different API key with available quota"
+          ],
+          retryAfter: parsedError?.error?.details?.[parsedError.error.details.length - 1]?.retryDelay || "1 hour",
+          details: errorMessage
+        });
+      }
+
+      // Handle API key errors
+      if (status === 403 || errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("unauthorized")) {
+        return res.status(403).json({
+          error: "Invalid API Key",
+          message: "Your Gemini API key is missing or invalid.",
+          solutions: [
+            "1. Get a free API key: https://ai.google.dev/",
+            "2. Add it to your .env.local file as GEMINI_API_KEY=your_key_here",
+            "3. Restart your dev server after adding the key"
+          ],
+          details: errorMessage
+        });
+      }
+
+      return res.status(status).json({
+        error: "Gemini API Error",
+        status: geminiRes.statusText,
+        message: errorMessage,
+        details: errorText
+      });
     }
 
     const geminiData = await geminiRes.json();
@@ -99,7 +146,8 @@ Explanation: Setting \`length = 0\` clears the array.
   } catch (error) {
     res.status(500).json({
       error: "Gemini API error",
-      details: (error as Error).message,
+      message: (error as Error).message,
+      details: (error as Error).stack
     });
   }
 }
