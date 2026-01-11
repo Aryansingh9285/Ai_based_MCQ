@@ -39,6 +39,7 @@ function TestPageContent() {
   const [hydrated, setHydrated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<{error: string; message: string; reason: string} | null>(null);
 
   useEffect(() => {
     setHydrated(true);
@@ -62,22 +63,29 @@ function TestPageContent() {
           console.error('API Error:', errorData);
 
           if (res.status === 429 || errorData.status === 'QUOTA_EXCEEDED') {
-            console.log('Using mock questions due to quota limit');
-            const mockQuestions = getMockQuestions(domain);
-            setQuestions(mockQuestions);
-            setError(null);
+            setApiError({
+              error: 'Quota Exceeded',
+              message: 'Too many API requests. Please try again later.',
+              reason: 'Rate limit exceeded on Gemini API'
+            });
+            setLoading(false);
             return;
           } else if (res.status === 403 || errorData.error === 'Invalid API Key') {
-            const solutions = errorData.solutions ? errorData.solutions.join('\n\n') : 'Please set up your API key in .env.local';
-            setError(
-              `🔑 API Key Error\n\n${errorData.message || 'Your API key is missing or invalid.'}\n\nSolutions:\n${solutions}`
-            );
-            throw new Error(`API Error: ${errorData.error}`);
+            setApiError({
+              error: 'API Key Error',
+              message: errorData.message || 'Your API key is missing or invalid.',
+              reason: 'Invalid or missing Gemini API key in .env.local'
+            });
+            setLoading(false);
+            return;
           } else {
-            setError(
-              `Failed to load questions: ${errorData.error}\n${errorData.message || ''}\n\nDetails: ${errorData.details || ''}`
-            );
-            throw new Error(`API Error: ${errorData.error}`);
+            setApiError({
+              error: errorData.error || 'API Error',
+              message: errorData.message || 'Failed to load questions from API',
+              reason: errorData.details || 'Unknown error occurred'
+            });
+            setLoading(false);
+            return;
           }
         }
 
@@ -100,18 +108,29 @@ function TestPageContent() {
           setQuestions(parsed);
         } else {
           setError('Invalid response format from API. Expected text content.');
+          setLoading(false);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch questions:', error);
-        // Use mock questions as fallback
-        const mockQuestions = getMockQuestions(domain);
-        setQuestions(mockQuestions);
-      } finally {
+        if (!apiError) {
+          setApiError({
+            error: 'Network Error',
+            message: 'Failed to connect to API',
+            reason: error.message || 'Network request failed'
+          });
+        }
         setLoading(false);
       }
     }
-    if (hydrated) fetchQuestions();
+    if (hydrated && domain) fetchQuestions();
   }, [domain, hydrated]);
+
+  const handleUseMockQuestions = () => {
+    const mockQuestions = getMockQuestions(domain);
+    setQuestions(mockQuestions);
+    setApiError(null);
+    setLoading(false);
+  };
 
   const handleSelectAnswer = (questionIndex: number, selectedOption: string) => {
     setAnswers(prev => ({
@@ -181,6 +200,46 @@ function TestPageContent() {
   };
 
   if (!hydrated) return null;
+
+  // Show API error state with mock questions option
+  if (apiError && !questions.length) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 px-4 py-8">
+        <div className="max-w-2xl w-full bg-white border-2 border-yellow-500 rounded-lg p-8 shadow-lg">
+          <div className="text-6xl mb-4 text-center">⚠️</div>
+          <h2 className="text-3xl font-bold text-yellow-700 mb-2 text-center">
+            {apiError.error}
+          </h2>
+          <p className="text-gray-700 text-center mb-4 text-lg">{apiError.message}</p>
+          
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-8">
+            <p className="text-yellow-900 font-semibold mb-2">Reason:</p>
+            <p className="text-yellow-800">{apiError.reason}</p>
+          </div>
+
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-8">
+            <p className="text-blue-900 font-semibold mb-3">Want to continue testing your skills?</p>
+            <p className="text-blue-800 mb-4">You can use mock questions to practice while we fix the API issue.</p>
+          </div>
+
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={handleUseMockQuestions}
+              className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition shadow-md text-lg"
+            >
+              ✓ Use Mock Questions
+            </button>
+            <button
+              onClick={() => window.history.back()}
+              className="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold transition shadow-md text-lg"
+            >
+              ← Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show error state
   if (error) {
@@ -304,8 +363,8 @@ function TestPageContent() {
     }
     
     correctAnswer = correctValue || '';
-    isCorrect = selectedAnswer && correctAnswer && 
-      selectedAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+    isCorrect = !!(selectedAnswer && correctAnswer && 
+      selectedAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase());
   }
 
   return (
